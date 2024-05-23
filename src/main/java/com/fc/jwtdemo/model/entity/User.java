@@ -28,4 +28,11 @@ public class User {
 
     private String name;
 
+    public User(Long id) {
+        this.id = id;
+        this.email = null;
+        this.password = null;
+        this.name = null;
+    }
+
 }
