@@ -12,6 +12,8 @@ public enum AuthErrorCode implements ErrorCode {
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료됐습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "잘못된 토큰입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+    APPLICATION_TYPE_ERROR(HttpStatus.BAD_REQUEST, "JSON 형식만 지원합니다."),
+    INVALID_INPUT(HttpStatus.BAD_REQUEST, "형식에 맞지 않습니다.")
     ;
 
     private final HttpStatus status;

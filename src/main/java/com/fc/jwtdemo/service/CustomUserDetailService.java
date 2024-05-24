@@ -7,6 +7,7 @@ import com.fc.jwtdemo.model.entity.User;
 import com.fc.jwtdemo.model.request.SignUpRequest;
 import com.fc.jwtdemo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
@@ -22,13 +24,19 @@ public class CustomUserDetailService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) {
+        ;
         User user = userRepository.findByEmail(email).orElseThrow(
             () -> new CustomApiException(AuthErrorCode.NOT_FOUND)
         );
         return new CustomUserDetails(user);
     }
 
+    public UserDetails loadUserById(Long userId) throws UsernameNotFoundException {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomApiException(AuthErrorCode.NOT_FOUND));
+        return new CustomUserDetails(user);
+    }
 
     @Transactional
     public void signUp(SignUpRequest request) {

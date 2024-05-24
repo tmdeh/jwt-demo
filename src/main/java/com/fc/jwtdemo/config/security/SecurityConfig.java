@@ -1,6 +1,11 @@
 package com.fc.jwtdemo.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fc.jwtdemo.filter.JwtAuthenticationFilter;
 import com.fc.jwtdemo.filter.LoginFilter;
+import com.fc.jwtdemo.jwt.JwtUtil;
+import com.fc.jwtdemo.service.CustomUserDetailService;
+import com.fc.jwtdemo.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +17,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -21,20 +28,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final AccessDeniedHandler accessDeniedHandler;
+    private final ObjectMapper objectMapper;
+    private final JwtService jwtService;
 
     @Bean
-    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+    public SecurityFilterChain configure(HttpSecurity http, JwtUtil jwtUtil,
+        CustomUserDetailService customUserDetailService) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler)
+            )
             .authorizeHttpRequests(matcher -> {
                 matcher
                     .requestMatchers("/login", "/sign-up").permitAll()
                     .anyRequest().authenticated();
             })
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
-
+            .addFilterBefore(
+                new LoginFilter(authenticationManager(authenticationConfiguration), objectMapper,
+                    jwtService), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(new JwtAuthenticationFilter(jwtUtil, customUserDetailService), LoginFilter.class);
 
         return http.build();
     }
@@ -45,7 +63,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
+        throws Exception {
         return configuration.getAuthenticationManager();
     }
 

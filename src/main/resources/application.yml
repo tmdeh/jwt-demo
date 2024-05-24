@@ -1,4 +1,6 @@
 spring:
+  jwt:
+    secret: savemeyuseungdospringbootblogservice
   jpa:
     show-sql: true
     properties:
@@ -12,5 +14,3 @@ spring:
     username: root
     password: 1234
 
-jwt:
-  secret: savemeyuseungdospringbootblogservice
