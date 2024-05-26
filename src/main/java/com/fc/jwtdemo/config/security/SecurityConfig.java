@@ -50,7 +50,7 @@ public class SecurityConfig {
             })
             .addFilterAt(
                 new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, objectMapper), UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(new JwtExceptionFilter(objectMapper), UsernamePasswordAuthenticationFilter.class)
+//            .addFilterAfter(new JwtExceptionFilter(objectMapper), UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(new JwtAuthenticationFilter(jwtUtil, customUserDetailService), LoginFilter.class);
 
         return http.build();

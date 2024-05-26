@@ -1,7 +1,6 @@
 package com.fc.jwtdemo.exception.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fc.jwtdemo.model.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -24,6 +23,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response,
         AuthenticationException authException)
         throws IOException {
+
+        log.error("hello");
+
         log.warn("Unauthorized error: {}", authException.getMessage());
 
         response.setContentType("application/json; charset=UTF-8");

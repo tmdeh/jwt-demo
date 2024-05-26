@@ -3,7 +3,6 @@ package com.fc.jwtdemo.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fc.jwtdemo.exception.CustomApiException;
 import com.fc.jwtdemo.exception.code.AuthErrorCode;
-import com.fc.jwtdemo.model.ErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
