@@ -1,15 +1,12 @@
 package com.fc.jwtdemo.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fc.jwtdemo.config.security.jwt.JwtUtil;
 import com.fc.jwtdemo.exception.CustomApiException;
 import com.fc.jwtdemo.exception.code.AuthErrorCode;
-import com.fc.jwtdemo.jwt.JwtUtil;
 import com.fc.jwtdemo.model.dto.CustomUserDetails;
 import com.fc.jwtdemo.model.request.LoginRequest;
-import com.fc.jwtdemo.service.JwtService;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +24,16 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
+//    private final static Long EXPIRED_AT = 24 * 60 * 60 * 1000L;
+    private final static Long ACCESS_EXPIRED_AT = 0L;
+    private final static Long REFRESH_EXPIRED_AT = 0L;
+
+
     private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
     private final ObjectMapper objectMapper;
-    private final JwtService jwtService;
+
+
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -61,9 +65,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         //JWT 토큰 발급 및 쿠키에 등록
-        jwtService.createAndAddHeader(userDetails, response);
+        String accessToken = jwtUtil.createJwt(userDetails.getUser().getId(), ACCESS_EXPIRED_AT);
+        String refreshToken = jwtUtil.createJwt(REFRESH_EXPIRED_AT);
 
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.addHeader("Authorization", "Bearer " + accessToken);
+
+        response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json");
         response.getWriter().write("{\"message\": \"Authentication successful\"}");
 

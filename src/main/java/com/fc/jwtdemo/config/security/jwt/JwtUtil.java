@@ -1,9 +1,7 @@
-package com.fc.jwtdemo.jwt;
+package com.fc.jwtdemo.config.security.jwt;
 
 import com.fc.jwtdemo.exception.CustomApiException;
 import com.fc.jwtdemo.exception.code.AuthErrorCode;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -48,6 +46,14 @@ public class JwtUtil {
 
         return Jwts.builder()
             .claim("user_id", userId)
+            .issuedAt(new Date(System.currentTimeMillis()))
+            .expiration(new Date(System.currentTimeMillis() + expiredMs))
+            .signWith(secretKey)
+            .compact();
+    }
+
+    public String createJwt(Long expiredMs) {
+        return Jwts.builder()
             .issuedAt(new Date(System.currentTimeMillis()))
             .expiration(new Date(System.currentTimeMillis() + expiredMs))
             .signWith(secretKey)

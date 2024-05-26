@@ -2,10 +2,10 @@ package com.fc.jwtdemo.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fc.jwtdemo.filter.JwtAuthenticationFilter;
+import com.fc.jwtdemo.filter.JwtExceptionFilter;
 import com.fc.jwtdemo.filter.LoginFilter;
-import com.fc.jwtdemo.jwt.JwtUtil;
+import com.fc.jwtdemo.config.security.jwt.JwtUtil;
 import com.fc.jwtdemo.service.CustomUserDetailService;
-import com.fc.jwtdemo.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,6 @@ public class SecurityConfig {
     private final AuthenticationEntryPoint authenticationEntryPoint;
     private final AccessDeniedHandler accessDeniedHandler;
     private final ObjectMapper objectMapper;
-    private final JwtService jwtService;
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http, JwtUtil jwtUtil,
@@ -49,9 +48,9 @@ public class SecurityConfig {
                     .requestMatchers("/login", "/sign-up").permitAll()
                     .anyRequest().authenticated();
             })
-            .addFilterBefore(
-                new LoginFilter(authenticationManager(authenticationConfiguration), objectMapper,
-                    jwtService), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAt(
+                new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, objectMapper), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(new JwtExceptionFilter(objectMapper), UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(new JwtAuthenticationFilter(jwtUtil, customUserDetailService), LoginFilter.class);
 
         return http.build();
