@@ -1,40 +1,38 @@
 package com.fc.jwtdemo.exception;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import java.security.SignatureException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
+
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@RequiredArgsConstructor
 @RestControllerAdvice
 @Slf4j
 public class ExceptionControllerAdvice {
 
+    private final ObjectMapper objectMapper;
 
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<?> handleExpiredJwtException(ExpiredJwtException ex) {
-//        CustomApiException apiException = new CustomApiException(AuthErrorCode.EXPIRED_TOKEN);
-        log.warn(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public void handleJwtAuthenticationException(JwtAuthenticationException ex, HttpServletResponse response) throws IOException {
+        log.error("JWT Authentication error: {}", ex.getMessage());
+        response.setStatus(ex.getHttpStatus().value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("error", ex.getErrorCode().name());
+        errorDetails.put("message", ex.getMessage());
+
+        response.getWriter().write(objectMapper.writeValueAsString(errorDetails));
     }
-
-    @ExceptionHandler(SignatureException.class)
-    public ResponseEntity<?> handleSignatureException(SignatureException ex) {
-//        CustomApiException apiException = new CustomApiException(AuthErrorCode.INVALID_TOKEN);
-        log.warn(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<?> handleAuthenticationException(AuthenticationException ex) {
-//        CustomApiException apiException = new CustomApiException(AuthErrorCode.UNAUTHORIZED);
-        log.warn(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
 
     @ExceptionHandler(CustomApiException.class)
     public ResponseEntity<?> exception(CustomApiException e) {

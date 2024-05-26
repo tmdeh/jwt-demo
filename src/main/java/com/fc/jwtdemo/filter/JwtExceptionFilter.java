@@ -37,7 +37,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     private void handleException(HttpServletResponse response, CustomApiException ex) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json; charset=UTF-8");
-        String responseBody = objectMapper.writeValueAsString(new ErrorResponse(ex.getErrorMessage()));
-        response.getWriter().write(responseBody);
+//        String responseBody = objectMapper.writeValueAsString(new ErrorResponse(ex.getErrorMessage()));
+//        response.getWriter().write(responseBody);
     }
 }

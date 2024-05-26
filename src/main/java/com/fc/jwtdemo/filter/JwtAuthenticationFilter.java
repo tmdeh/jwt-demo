@@ -1,6 +1,7 @@
 package com.fc.jwtdemo.filter;
 
 import com.fc.jwtdemo.exception.CustomApiException;
+import com.fc.jwtdemo.exception.JwtAuthenticationException;
 import com.fc.jwtdemo.exception.code.AuthErrorCode;
 import com.fc.jwtdemo.config.security.jwt.JwtUtil;
 import com.fc.jwtdemo.service.CustomUserDetailService;
@@ -37,7 +38,7 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
         }
 
         if(jwtUtil.isExpired(jwt)) {
-            throw new CustomApiException(AuthErrorCode.EXPIRED_TOKEN);
+            throw new JwtAuthenticationException(AuthErrorCode.EXPIRED_TOKEN);
         }
 
         UserDetails userDetails = userDetailsService.loadUserById(userId);
